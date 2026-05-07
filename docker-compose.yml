@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # ─────────────────────────────────────────────
   # LOCAL LLM SERVICE (Ollama)
@@ -52,7 +50,7 @@ services:
   # ─────────────────────────────────────────────
   agent-app:
     build:
-      context: ./app
+      context: .
       dockerfile: Dockerfile
     container_name: esg_agent_app
     ports:

@@ -16,16 +16,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Download FinBERT model at build time (air-gapped after this)
-RUN python -c "
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import os
-model_path = '/workspace/models/finbert'
-os.makedirs(model_path, exist_ok=True)
-print('Downloading FinBERT...')
-AutoTokenizer.from_pretrained('ProsusAI/finbert', cache_dir=model_path)
-AutoModelForSequenceClassification.from_pretrained('ProsusAI/finbert', cache_dir=model_path)
-print('FinBERT ready.')
-"
+RUN python -c "from transformers import AutoTokenizer, AutoModelForSequenceClassification; import os; model_path = '/workspace/models/finbert'; os.makedirs(model_path, exist_ok=True); print('Downloading FinBERT...'); AutoTokenizer.from_pretrained('ProsusAI/finbert', cache_dir=model_path); AutoModelForSequenceClassification.from_pretrained('ProsusAI/finbert', cache_dir=model_path); print('FinBERT ready.')"
 
 # Create audit log directory
 RUN mkdir -p /workspace/audit_logs

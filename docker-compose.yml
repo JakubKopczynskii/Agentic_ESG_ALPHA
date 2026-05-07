@@ -1,0 +1,81 @@
+version: "3.9"
+
+services:
+  # ─────────────────────────────────────────────
+  # LOCAL LLM SERVICE (Ollama)
+  # ─────────────────────────────────────────────
+  local-llm:
+    image: ollama/ollama:latest
+    container_name: esg_local_llm
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    restart: unless-stopped
+    # GPU support (NVIDIA) — comment out if no GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ─────────────────────────────────────────────
+  # MODEL PULL SIDECAR (runs once, pulls Llama3)
+  # ─────────────────────────────────────────────
+  # model-puller:
+  #   image: curlimages/curl:latest
+  #   container_name: esg_model_puller
+  #   depends_on:
+  #     local-llm:
+  #       condition: service_healthy
+  #   entrypoint: >
+  #     sh -c "
+  #       echo 'Pulling llama3:8b quantized model...' &&
+  #       curl -s -X POST http://local-llm:11434/api/pull
+  #         -H 'Content-Type: application/json'
+  #         -d '{\"name\": \"llama3:8b\"}' &&
+  #       echo 'Model ready.'
+  #     "
+  #   restart: "no"
+
+  # ─────────────────────────────────────────────
+  # AGENT APPLICATION (Streamlit)
+  # ─────────────────────────────────────────────
+  agent-app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: esg_agent_app
+    ports:
+      - "8501:8501"
+    environment:
+      - OLLAMA_BASE_URL=http://local-llm:11434
+      - OLLAMA_MODEL=llama3:8b
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./app:/workspace
+      - audit_logs:/workspace/audit_logs
+    depends_on:
+      local-llm:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  ollama_models:
+    driver: local
+  audit_logs:
+    driver: local

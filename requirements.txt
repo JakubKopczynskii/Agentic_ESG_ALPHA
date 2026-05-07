@@ -1,13 +1,44 @@
-streamlit==1.35.0
-langgraph==0.1.14
-langchain==0.2.5
-langchain-community==0.2.5
-transformers==4.41.2
-torch==2.3.1
-requests==2.32.3
+# ─────────────────────────────────────────────────────────────────────────────
+# ESG Alpha-Optimizer — requirements.txt
+# Tested: Python 3.11.x  (venv)
+# Last verified: May 2026
+#
+# INSTALL:
+#   python -m venv .venv
+#   source .venv/bin/activate        # Windows: .venv\Scripts\activate
+#   pip install -r requirements.txt
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── UI
+streamlit==1.45.1
+
+# ── Orchestration
+langgraph==1.1.10
+langchain==1.2.17
+langchain-community==0.4.1
+
+# ── NLP / ML
+transformers==4.57.1
+torch==2.2.2                # last build that ships a Python 3.11 wheel
+                             # torch 2.3+ only builds for 3.12+
+
+# ── Data & HTTP
+# requests: intentionally unpinned — langchain-community and streamlit
+#           both require requests<3,>=2.27; let pip pick the latest
+requests
 pandas==2.2.2
 numpy==1.26.4
+httpx==0.27.0
+
+# ── Free market data (Day 2)
+yfinance==0.2.65             # Yahoo Finance — price/fundamentals
+feedparser==6.0.12           # RSS/Atom news feeds (Google News, Reuters)
+beautifulsoup4==4.12.3       # HTML scraping for news headlines
+lxml==5.2.2                  # Fast XML/HTML parser (bs4 backend)
+
+# ── Visualisation
 plotly==5.22.0
+
+# ── Config & utilities
 python-dotenv==1.0.1
 pydantic==2.7.4
-httpx==0.27.0
